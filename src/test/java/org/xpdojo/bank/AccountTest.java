@@ -3,6 +3,8 @@ package org.xpdojo.bank;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -14,9 +16,9 @@ public class AccountTest {
 
     @BeforeEach
     public void setUp() {
-        insufficientFundsAccount = new Account();
-        sufficientFundsAccount = new Account();
-        sufficientFundsAccount.deposit(new Money("12.34"));
+        this.insufficientFundsAccount = new Account();
+        this.sufficientFundsAccount = new Account();
+        this.sufficientFundsAccount.deposit(new Money("12.34"));
     }
 
     @Test
@@ -82,7 +84,6 @@ public class AccountTest {
                 .hasMessage("Withdrawal amount should be greater than 0.");
     }
 
-
     @Test
     public void transferAnAmountToDecreaseTheBalanceWhenSufficientFunds() {
         // Arrange
@@ -124,5 +125,59 @@ public class AccountTest {
         assertThatThrownBy(() -> sufficientFundsAccount.transfer(moneyToTransfer, insufficientFundsAccount))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Transfer amount should be greater than 0.");
+    }
+
+    @Test
+    public void filterStatementWhenFiltersAreNull() {
+        // Arrange
+        List<Transaction> statement = sufficientFundsAccount.getStatement();
+
+        // Act
+        List<Transaction> filteredStatement = sufficientFundsAccount.getFilteredStatement(statement,null, null);
+
+        // Assert
+        assertThat(filteredStatement.size()).isEqualTo(1);
+        assertThat(filteredStatement.size()).isEqualTo(statement.size());
+    }
+
+    @Test
+    public void filterStatementWhenFiltersAreValid() {
+        // Arrange
+        sufficientFundsAccount.withdraw(new Money("1"));
+        List<Transaction> statement = sufficientFundsAccount.getStatement();
+
+        // Act
+        List<Transaction> filteredStatement = sufficientFundsAccount.getFilteredStatement(statement,TransactionType.DEPOSIT, LocalDate.now());
+
+        // Assert
+        assertThat(filteredStatement.size()).isEqualTo(1);
+        assertThat(filteredStatement.size()).isNotEqualTo(statement.size());
+    }
+
+    @Test
+    public void filterStatementByType() {
+        // Arrange
+        sufficientFundsAccount.withdraw(new Money("1"));
+        List<Transaction> statement = sufficientFundsAccount.getStatement();
+
+        // Act
+        List<Transaction> filteredStatement = sufficientFundsAccount.getFilteredStatement(statement,TransactionType.WITHDRAWAL, null);
+
+        // Assert
+        assertThat(filteredStatement.size()).isEqualTo(1);
+        assertThat(filteredStatement.size()).isNotEqualTo(statement.size());
+    }
+
+    @Test
+    public void filterStatementByDate() {
+        // Arrange
+        List<Transaction> statement = sufficientFundsAccount.getStatement();
+
+        // Act
+        List<Transaction> filteredStatement = sufficientFundsAccount.getFilteredStatement(statement, null, LocalDate.now().plusDays(1));
+
+        // Assert
+        assertThat(filteredStatement.size()).isEqualTo(0);
+        assertThat(filteredStatement.size()).isNotEqualTo(statement.size());
     }
 }
