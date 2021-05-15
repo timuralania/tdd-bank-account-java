@@ -43,4 +43,43 @@ public class AccountTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Deposit amount should be greater than 0.");
     }
+
+    @Test
+    public void withdrawAnAmountToDecreaseTheBalanceWhenSufficientFunds() {
+        // Arrange
+        Money moneyToWithdraw = new Money("1");
+
+        // Act
+        Money balanceBeforeWithdrawal = sufficientFundsAccount.getBalance();
+        Boolean isWithdrawn = sufficientFundsAccount.withdraw(moneyToWithdraw);
+        Money balanceAfterWithdrawal = sufficientFundsAccount.getBalance();
+        Money difference = Money.getDifference(balanceBeforeWithdrawal, moneyToWithdraw);
+
+        // Assert
+        assertThat(isWithdrawn).isTrue();
+        assertThat(Money.compare(difference, balanceAfterWithdrawal)).isEqualTo(0);
+    }
+
+    @Test
+    public void withdrawAnAmountWhenInsufficientFunds() {
+        // Arrange
+        Money moneyToWithdraw = new Money("1");
+
+        // Assert
+        assertThatThrownBy(() -> insufficientFundsAccount.withdraw(moneyToWithdraw))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Insufficient funds.");
+    }
+
+    @Test
+    public void withdrawAnAmountWhenInvalidAmount() {
+        // Arrange
+        Money moneyToWithdraw = new Money("0");
+
+        // Assert
+        assertThatThrownBy(() -> insufficientFundsAccount.withdraw(moneyToWithdraw))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Withdrawal amount should be greater than 0.");
+    }
+
 }
