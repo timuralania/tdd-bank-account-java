@@ -5,4 +5,5 @@ package org.xpdojo.bank;
  * This class should have no accessor methods.
  */
 public class Money {
+
 }
