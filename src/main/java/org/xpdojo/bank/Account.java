@@ -1,3 +1,4 @@
+
 package org.xpdojo.bank;
 
 public class Account {
@@ -22,6 +23,13 @@ public class Account {
         if (!this.isEnoughMoney(withdraw)) throw new IllegalArgumentException("Insufficient funds.");
         this.balance = Money.getDifference(this.balance, withdraw);
         return true;
+    }
+
+    public Boolean transfer(Money transfer, Account receiver) {
+        if (!Money.isPositiveAmount(transfer))
+            throw new IllegalArgumentException("Transfer amount should be greater than 0.");
+        if (!this.isEnoughMoney(transfer)) throw new IllegalArgumentException("Insufficient funds.");
+        return this.withdraw(transfer) && receiver.deposit(transfer);
     }
 
     private Boolean isEnoughMoney(Money money) {

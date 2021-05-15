@@ -82,4 +82,47 @@ public class AccountTest {
                 .hasMessage("Withdrawal amount should be greater than 0.");
     }
 
+
+    @Test
+    public void transferAnAmountToDecreaseTheBalanceWhenSufficientFunds() {
+        // Arrange
+        Money moneyToTransfer = new Money("1");
+
+        // Act
+        Money senderBalanceBeforeTransfer = sufficientFundsAccount.getBalance();
+        Money receiverBalanceBeforeTransfer = insufficientFundsAccount.getBalance();
+        Boolean isTransferred = sufficientFundsAccount.transfer(moneyToTransfer, insufficientFundsAccount);
+        Money senderBalanceAfterTransfer = sufficientFundsAccount.getBalance();
+        Money receiverBalanceAfterTransfer = insufficientFundsAccount.getBalance();
+
+        Money senderDifference = Money.getDifference(senderBalanceBeforeTransfer, moneyToTransfer);
+        Money receiverDifference = Money.getDifference(receiverBalanceAfterTransfer, moneyToTransfer);
+
+        // Assert
+        assertThat(isTransferred).isTrue();
+        assertThat(Money.compare(senderDifference, senderBalanceAfterTransfer)).isEqualTo(0);
+        assertThat(Money.compare(receiverDifference, receiverBalanceBeforeTransfer)).isEqualTo(0);
+    }
+
+    @Test
+    public void transferAnAmountWhenInsufficientFunds() {
+        // Arrange
+        Money moneyToTransfer = new Money("1");
+
+        // Assert
+        assertThatThrownBy(() -> insufficientFundsAccount.transfer(moneyToTransfer, sufficientFundsAccount))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Insufficient funds.");
+    }
+
+    @Test
+    public void transferAnAmountWhenInvalidAmount() {
+        // Arrange
+        Money moneyToTransfer = new Money("0");
+
+        // Assert
+        assertThatThrownBy(() -> sufficientFundsAccount.transfer(moneyToTransfer, insufficientFundsAccount))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Transfer amount should be greater than 0.");
+    }
 }
