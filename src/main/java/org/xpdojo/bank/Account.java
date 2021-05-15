@@ -1,5 +1,6 @@
-
 package org.xpdojo.bank;
+
+import java.time.LocalDateTime;
 
 public class Account {
     private Money balance;
@@ -30,6 +31,15 @@ public class Account {
             throw new IllegalArgumentException("Transfer amount should be greater than 0.");
         if (!this.isEnoughMoney(transfer)) throw new IllegalArgumentException("Insufficient funds.");
         return this.withdraw(transfer) && receiver.deposit(transfer);
+    }
+
+    public void printBalance() {
+        StringBuilder prettyBalance = new StringBuilder()
+                .append(LocalDateTime.now())
+                .append(" - BALANCE: ")
+                .append(this.balance)
+                .append("\n");
+        System.out.println(prettyBalance);
     }
 
     private Boolean isEnoughMoney(Money money) {
